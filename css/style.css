@@ -116,7 +116,8 @@ section{max-width:var(--max);margin:0 auto;padding:6rem 1.5rem 0}
 .about-text p:last-child{color:var(--haze);font-size:.95rem}
 
 /* listen */
-.listen-grid{display:grid;grid-template-columns:1fr 1fr;gap:1.5rem}
+.listen-grid{display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;align-items:start}
+.spotify-embed{border-radius:12px;overflow:hidden}
 .listen-slot{
   background:var(--smoke);border:1px solid var(--line);border-radius:2px;
   aspect-ratio:16/9;display:flex;align-items:center;justify-content:center;
