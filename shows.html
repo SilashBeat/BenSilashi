@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -69,16 +68,22 @@ const MAX_UPCOMING = 20;
 const MAX_PAST = 10;          // most recent past gigs shown
 const PAST_MONTHS = 12;       // how far back to look
 
-function fmtDate(ev) {
-  if (ev.start.date) {
-    const d = new Date(ev.start.date + 'T12:00:00');
-    return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
-  }
-  const d = new Date(ev.start.dateTime);
-  const opts = { month: 'short', day: 'numeric', year: 'numeric', hour: 'numeric', minute: '2-digit' };
-  // Display each event in its own timezone, not the viewer's.
-  if (ev.start.timeZone) opts.timeZone = ev.start.timeZone;
-  return d.toLocaleString('en-US', opts);
+function evDate(ev) {
+  // Returns {d: Date, tz: timezone or null, allDay: bool}
+  if (ev.start.date) return { d: new Date(ev.start.date + 'T12:00:00'), tz: null, allDay: true };
+  return { d: new Date(ev.start.dateTime), tz: ev.start.timeZone || null, allDay: false };
+}
+
+function fmtParts(ev) {
+  const { d, tz, allDay } = evDate(ev);
+  const base = tz ? { timeZone: tz } : {};
+  const month = d.toLocaleString('en-US', { ...base, month: 'short' }).toUpperCase();
+  const day = d.toLocaleString('en-US', { ...base, day: 'numeric' });
+  let full = d.toLocaleString('en-US', {
+    ...base, weekday: 'short', month: 'short', day: 'numeric', year: 'numeric',
+    ...(allDay ? {} : { hour: '2-digit', minute: '2-digit' })
+  }).toUpperCase();
+  return { month, day, full };
 }
 
 function esc(s) {
@@ -88,14 +93,22 @@ function esc(s) {
 }
 
 function rowHTML(ev) {
+  const p = fmtParts(ev);
+  const details = ev.htmlLink
+    ? `<a class="show-details" href="${ev.htmlLink}" target="_blank" rel="noopener">Details &rarr;</a>`
+    : '';
   return `
     <div class="show">
-      <div class="date"><span class="date-tag">${esc(fmtDate(ev))}</span></div>
-      <div>
-        <span class="venue">${esc(ev.summary || 'TBA')}</span><br>
-        <span class="city">${esc(ev.location || '')}</span>
+      <div class="date-cal">
+        <span class="cal-month">${p.month}</span>
+        <span class="cal-day">${p.day}</span>
       </div>
-      <div class="city">${ev.description ? esc(ev.description) : ''}</div>
+      <div class="show-body">
+        <div class="show-title">${esc(ev.summary || 'TBA')}</div>
+        <div class="show-when">${p.full}</div>
+        <div class="show-where">${esc(ev.location || '')}</div>
+        ${details}
+      </div>
     </div>`;
 }
 
