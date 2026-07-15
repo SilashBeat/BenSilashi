@@ -145,14 +145,14 @@ section{max-width:var(--max);margin:0 auto;padding:6rem 1.5rem 0}
 
 /* shows */
 .show{
-  display:grid;grid-template-columns:auto 1fr;gap:1.8rem;align-items:start;
+  display:grid;grid-template-columns:auto 1fr;gap:1.8rem;align-items:center;
   padding:2rem 0;border-bottom:1px solid var(--line);
 }
 .show:first-of-type{border-top:1px solid var(--line)}
 .date-cal{
   display:flex;flex-direction:column;align-items:center;justify-content:center;
-  min-width:64px;padding:.55rem .7rem;
-  border:1px solid var(--line);border-radius:10px;background:var(--smoke);
+  width:68px;height:68px;flex-shrink:0;
+  border:1px solid var(--line);border-radius:12px;background:var(--smoke);
 }
 .cal-month{font-size:.7rem;letter-spacing:.18em;color:var(--signal);line-height:1.4}
 .cal-day{font-size:1.5rem;font-weight:600;color:var(--bone);line-height:1.1}
