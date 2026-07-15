@@ -154,8 +154,9 @@ section{max-width:var(--max);margin:0 auto;padding:6rem 1.5rem 0}
   display:inline-block;
   border:1px solid var(--signal);
   color:var(--signal);
-  border-radius:999px;
-  padding:.25rem .8rem;
+  background:rgba(127,163,255,.08);
+  border-radius:6px;
+  padding:.3rem .7rem;
   text-transform:uppercase;
   letter-spacing:.1em;
   white-space:nowrap;
@@ -164,7 +165,7 @@ section{max-width:var(--max);margin:0 auto;padding:6rem 1.5rem 0}
 .show .city{color:var(--haze);font-size:.95rem}
 .shows-note{margin-top:1.4rem;color:var(--haze);font-size:.9rem}
 .past-section .show{opacity:.55}
-.past-section .show .date-tag{color:var(--haze);border-color:var(--line)}
+.past-section .show .date-tag{color:var(--haze);border-color:var(--line);background:transparent}
 .inline-link{color:var(--signal)}
 .inline-link:hover{text-decoration:underline}
 
