@@ -78,6 +78,7 @@ nav.scrolled{background:rgba(10,12,18,.92);backdrop-filter:blur(8px);border-bott
 /* full-screen page hero */
 .hero-page img{object-position:50% 40%}
 .hero-shows img{object-position:42% 30%}
+.hero-media img{object-position:45% 35%}
 .hero-page h1{
   font-family:'Oswald',sans-serif;font-weight:600;
   font-size:clamp(3rem, 10vw, 8rem);
