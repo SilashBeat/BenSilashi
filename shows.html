@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -90,7 +89,7 @@ function esc(s) {
 function rowHTML(ev) {
   return `
     <div class="show">
-      <div class="date">${esc(fmtDate(ev))}</div>
+      <div class="date"><span class="date-tag">${esc(fmtDate(ev))}</span></div>
       <div>
         <span class="venue">${esc(ev.summary || 'TBA')}</span><br>
         <span class="city">${esc(ev.location || '')}</span>
