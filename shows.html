@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -29,9 +30,21 @@
 <div class="page-header"><h1>Shows</h1></div>
 
 <section>
-  <div id="shows-list">
-    <p class="shows-note" id="shows-status">Loading shows&hellip;</p>
+  <div class="label">Upcoming</div>
+  <div id="upcoming-list">
+    <p class="shows-note" id="upcoming-status">Loading dates&hellip;</p>
   </div>
+</section>
+
+<section class="past-section">
+  <div class="label">Past</div>
+  <div id="past-list">
+    <p class="shows-note" id="past-status">Loading dates&hellip;</p>
+  </div>
+</section>
+
+<section>
+  <p class="shows-note">For booking and enquiries, <a href="contact.html" class="inline-link">get in touch</a>.</p>
 </section>
 </main>
 
@@ -50,15 +63,13 @@ addEventListener('scroll', () => nav.classList.toggle('scrolled', scrollY > 40),
 // 1. Create a public Google Calendar for Ben and paste its ID below.
 // 2. Create a Google Cloud API key with the Calendar API enabled,
 //    restricted to Ben's domain (HTTP referrer), and paste it below.
-const CALENDAR_ID = 'c21fc24a2a3f96d86a77196c9faa8e0f4e0c20e30cdb62ed565daa3137f4eb7a@group.calendar.google.com';
-const API_KEY = 'AIzaSyBY7mp_hMTp5Lr3tRzNE96DvY7rn6e0eWE';
-const MAX_RESULTS = 20;
-
-const list = document.getElementById('shows-list');
-const status = document.getElementById('shows-status');
+const CALENDAR_ID = 'PASTE_CALENDAR_ID_HERE';
+const API_KEY = 'PASTE_API_KEY_HERE';
+const MAX_UPCOMING = 20;
+const MAX_PAST = 10;          // most recent past gigs shown
+const PAST_MONTHS = 12;       // how far back to look
 
 function fmtDate(ev) {
-  // All-day events use start.date; timed events use start.dateTime.
   if (ev.start.date) {
     const d = new Date(ev.start.date + 'T12:00:00');
     return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
@@ -76,40 +87,69 @@ function esc(s) {
   return div.innerHTML;
 }
 
-async function loadShows() {
-  if (CALENDAR_ID.startsWith('PASTE') || API_KEY.startsWith('PASTE')) {
-    status.textContent = 'Shows widget not configured yet. Add the calendar ID and API key in shows.html.';
-    return;
-  }
-  const url = 'https://www.googleapis.com/calendar/v3/calendars/'
+function rowHTML(ev) {
+  return `
+    <div class="show">
+      <div class="date">${esc(fmtDate(ev))}</div>
+      <div>
+        <span class="venue">${esc(ev.summary || 'TBA')}</span><br>
+        <span class="city">${esc(ev.location || '')}</span>
+      </div>
+      <div class="city">${ev.description ? esc(ev.description) : ''}</div>
+    </div>`;
+}
+
+function calURL(params) {
+  return 'https://www.googleapis.com/calendar/v3/calendars/'
     + encodeURIComponent(CALENDAR_ID)
     + '/events?key=' + API_KEY
-    + '&timeMin=' + new Date().toISOString()
-    + '&singleEvents=true&orderBy=startTime&maxResults=' + MAX_RESULTS;
+    + '&singleEvents=true&orderBy=startTime&' + params;
+}
+
+async function fetchEvents(params) {
+  const res = await fetch(calURL(params));
+  if (!res.ok) throw new Error(res.status);
+  const data = await res.json();
+  return data.items || [];
+}
+
+async function loadShows() {
+  const upList = document.getElementById('upcoming-list');
+  const upStatus = document.getElementById('upcoming-status');
+  const pastList = document.getElementById('past-list');
+  const pastStatus = document.getElementById('past-status');
+
+  if (CALENDAR_ID.startsWith('PASTE') || API_KEY.startsWith('PASTE')) {
+    upStatus.textContent = 'Shows widget not configured yet. Add the calendar ID and API key in shows.html.';
+    pastStatus.textContent = '';
+    return;
+  }
+
+  const now = new Date();
+  const pastFrom = new Date(now);
+  pastFrom.setMonth(pastFrom.getMonth() - PAST_MONTHS);
+
+  // Upcoming
   try {
-    const res = await fetch(url);
-    if (!res.ok) throw new Error(res.status);
-    const data = await res.json();
-    const events = data.items || [];
-    if (!events.length) {
-      status.textContent = 'No upcoming shows. Check back soon.';
-      return;
-    }
-    list.innerHTML = events.map(ev => `
-      <div class="show">
-        <div class="date">${esc(fmtDate(ev))}</div>
-        <div>
-          <span class="venue">${esc(ev.summary || 'TBA')}</span><br>
-          <span class="city">${esc(ev.location || '')}</span>
-        </div>
-        <div class="city">${ev.description ? esc(ev.description) : ''}</div>
-      </div>
-    `).join('');
+    const events = await fetchEvents('timeMin=' + now.toISOString() + '&maxResults=' + MAX_UPCOMING);
+    upList.innerHTML = events.length
+      ? events.map(rowHTML).join('')
+      : '<p class="shows-note">No upcoming shows. Check back soon.</p>';
   } catch (err) {
-    status.textContent = 'Could not load shows right now.';
+    upStatus.textContent = 'Could not load dates right now.';
+  }
+
+  // Past (most recent first)
+  try {
+    const events = await fetchEvents('timeMin=' + pastFrom.toISOString() + '&timeMax=' + now.toISOString() + '&maxResults=100');
+    const recent = events.reverse().slice(0, MAX_PAST);
+    pastList.innerHTML = recent.length
+      ? recent.map(rowHTML).join('')
+      : '<p class="shows-note">No past shows listed.</p>';
+  } catch (err) {
+    pastStatus.textContent = 'Could not load dates right now.';
   }
 }
 loadShows();
-</script>
-</body>
+</script></body>
 </html>
