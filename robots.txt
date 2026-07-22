@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://bensilashi.com/sitemap.xml
